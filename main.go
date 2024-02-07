@@ -12,8 +12,14 @@ import (
 	"time"
 )
 
-func getStockValue(valor string) (string, string, string, string) {
-	response, err := http.Get("https://investidor10.com.br/acoes/" + valor + "/")
+func getStockValue(valor string, opcao int16) (string, string, string, string) {
+	var response *http.Response
+	var err error
+	if opcao == 1 {
+		response, err = http.Get("https://investidor10.com.br/acoes/" + valor + "/")
+	} else {
+		response, err = http.Get("https://investidor10.com.br/fiis/" + valor + "/")
+	}
 	if err != nil {
 		log.Fatal("Erro ao fazer requisição", err)
 	}
@@ -39,21 +45,17 @@ func getStockValue(valor string) (string, string, string, string) {
 
 func findDividendYield(doc *goquery.Document) string {
 	var result string
-	doc.Find("div._card.dy > div._card-body > span").Each(func(index int, item *goquery.Selection) {
-		texts := item.Text()
-		log.Println("Dividend Yield: ", texts)
-		result = texts
+	doc.Find("#cards-ticker > div:nth-child(2) > div._card-body > div > span").Each(func(index int, item *goquery.Selection) {
+		log.Println("Dividend Yield: ", strings.TrimSpace(item.Text()))
+		result = strings.TrimSpace(item.Text())
 	})
 	return result
 }
 func findCotacao(doc *goquery.Document) string {
 	var result string
-	doc.Find("div.cotacao > div._card-body > div > span").Each(func(index int, item *goquery.Selection) {
-		texts := item.Text()
-		if strings.Contains(texts, "R$") {
-			log.Println("Cotação: ", texts)
-			result = texts
-		}
+	doc.Find("#cards-ticker > div._card.cotacao > div._card-body > div > span").Each(func(index int, item *goquery.Selection) {
+		log.Println("Cotação: ", strings.TrimSpace(item.Text()))
+		result = strings.TrimSpace(item.Text())
 	})
 	return result
 }
@@ -113,17 +115,24 @@ func main() {
 			}
 		}
 	}()
-	cotacao, dividendYield, lpa, vpa := getStockValue(valor)
+	cotacao, dividendYield, lpa, vpa := getStockValue(valor, option)
 	done <- true
 	log.Println("Deseja utilizar o método Bazin ou Graham? (1/2)")
 	_, err = fmt.Scan(&option)
 	switch option {
 	case 1:
-		cotacao = strings.Replace(strings.TrimSpace(cotacao), "R$ ", "", -1)
-		dividendYield = strings.Replace(strings.TrimSpace(dividendYield), "%", "", -1)
-		cotacaoFloat, _ := strconv.ParseFloat(strings.Replace(cotacao, ",", ".", -1), 64)
-		dividendYieldFloat, _ := strconv.ParseFloat(strings.Replace(dividendYield, ",", ".", -1), 64)
-		log.Printf("Preço Teto: %.2f\n", bazinMethod(dividendYieldFloat, cotacaoFloat))
+		dividendYieldStr := strings.Replace(strings.Replace(dividendYield, "%", "", -1), ",", ".", -1)
+		dividendYield, err := strconv.ParseFloat(dividendYieldStr, 64)
+		if err != nil {
+			log.Fatal(err)
+		}
+		cotacaoStr := strings.Replace(strings.Replace(cotacao, "R$", "", -1), ",", ".", -1)
+		cotacao, err := strconv.ParseFloat(strings.TrimSpace(cotacaoStr), 64)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Printf("Valor Teto: %.2f\n", bazinMethod(dividendYield, cotacao))
+
 	case 2:
 		vpa, _ := strconv.ParseFloat(strings.Replace(vpa, ",", ".", -1), 64)
 		lpa, _ := strconv.ParseFloat(strings.Replace(lpa, ",", ".", -1), 64)
