@@ -42,14 +42,16 @@ func getStockValue(valor string, opcao int16) (string, string, string, string) {
 
 func findDividendYield(doc *goquery.Document, opcao int16) string {
 	var result string
+	colorGreen := "\033[32m"
+	resetColor := "\033[0m"
 	if opcao == 1 {
 		doc.Find("#cards-ticker > div._card.dy > div._card-body > span").Each(func(index int, item *goquery.Selection) {
-			log.Println("Dividend Yield: ", strings.TrimSpace(item.Text()))
+			log.Println("Dividend Yield:", colorGreen, strings.TrimSpace(item.Text()), resetColor)
 			result = strings.TrimSpace(item.Text())
 		})
 	} else {
 		doc.Find("#cards-ticker > div:nth-child(2) > div._card-body > div > span").Each(func(index int, item *goquery.Selection) {
-			log.Println("Dividend Yield: ", strings.TrimSpace(item.Text()))
+			log.Println("Dividend Yield:", colorGreen, strings.TrimSpace(item.Text()), resetColor)
 			result = strings.TrimSpace(item.Text())
 		})
 	}
@@ -57,8 +59,10 @@ func findDividendYield(doc *goquery.Document, opcao int16) string {
 }
 func findCotacao(doc *goquery.Document) string {
 	var result string
+	colorGreen := "\033[32m"
+	resetColor := "\033[0m"
 	doc.Find("#cards-ticker > div._card.cotacao > div._card-body > div > span").Each(func(index int, item *goquery.Selection) {
-		log.Println("Cotação: ", strings.TrimSpace(item.Text()))
+		log.Println("Cotação:", colorGreen, strings.TrimSpace(item.Text()), resetColor)
 		result = strings.TrimSpace(item.Text())
 	})
 	return result
@@ -66,8 +70,10 @@ func findCotacao(doc *goquery.Document) string {
 
 func findLucroPorAcao(doc *goquery.Document) string {
 	var result string
+	colorGreen := "\033[32m"
+	resetColor := "\033[0m"
 	doc.Find("#table-indicators > div:nth-child(16) > div.value.d-flex.justify-content-between.align-items-center").Each(func(index int, item *goquery.Selection) {
-		log.Println("Lucro por Ação (LPA): ", strings.TrimSpace(item.Text()))
+		log.Println("Lucro por ação (LPA):", colorGreen, strings.TrimSpace(item.Text()), resetColor)
 		result = strings.TrimSpace(item.Text())
 	})
 	return strings.TrimSpace(result)
@@ -75,8 +81,10 @@ func findLucroPorAcao(doc *goquery.Document) string {
 
 func findValorPorAcao(doc *goquery.Document) string {
 	var result string
+	colorGreen := "\033[32m"
+	resetColor := "\033[0m"
 	doc.Find("#table-indicators > div:nth-child(15) > div.value.d-flex.justify-content-between.align-items-center").Each(func(index int, item *goquery.Selection) {
-		log.Println("Valor Patrimonial por ação (VPA): ", strings.TrimSpace(item.Text()))
+		log.Println("Valor Patrimonial por Ação (VPA):", colorGreen, strings.TrimSpace(item.Text()), resetColor)
 		result = strings.TrimSpace(item.Text())
 	})
 	return strings.TrimSpace(result)
