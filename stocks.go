@@ -99,3 +99,13 @@ func grahamMethod(lpa, vpa float64) float64 {
 	const GRAHAM_VALUE = 22.5
 	return math.Sqrt(GRAHAM_VALUE * (lpa * vpa))
 }
+func fairValue(value float64, cotacao float64) {
+	colorRed := "\033[31m"
+	colorGreen := "\033[32m"
+	resetColor := "\033[0m"
+	if value < cotacao {
+		log.Printf("Valor Teto: %s %.2f %s\n", colorRed, value, resetColor)
+	} else {
+		log.Printf("Valor Teto: %s %.2f %s\n", colorGreen, value, resetColor)
+	}
+}

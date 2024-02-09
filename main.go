@@ -36,25 +36,18 @@ func main() {
 			}
 		}
 	}()
-	cotacao, dividendYield, lpa, vpa := getStockValue(valor, option)
+	cotacaoStr, dividendYieldStr, lpa, vpa := getStockValue(valor, option)
+	dividendYield, err := strconv.ParseFloat(strings.ReplaceAll(strings.ReplaceAll(dividendYieldStr, "%", ""), ",", "."), 64)
+	cotacao, err := strconv.ParseFloat(strings.TrimSpace(strings.ReplaceAll(strings.ReplaceAll(cotacaoStr, "R$", ""), ",", ".")), 64)
 	done <- true
 	log.Println("Deseja utilizar o método Bazin ou Graham? (1/2)")
 	_, err = fmt.Scan(&option)
 	switch option {
 	case 1:
-		dividendYield, err := strconv.ParseFloat(strings.ReplaceAll(strings.ReplaceAll(dividendYield, "%", ""), ",", "."), 64)
-		if err != nil {
-			log.Fatal(err)
-		}
-		cotacao, err := strconv.ParseFloat(strings.TrimSpace(strings.ReplaceAll(strings.ReplaceAll(cotacao, "R$", ""), ",", ".")), 64)
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Printf("Valor Teto: %.2f\n", bazinMethod(dividendYield, cotacao))
-
+		fairValue(bazinMethod(cotacao, dividendYield), cotacao)
 	case 2:
 		vpa, _ := strconv.ParseFloat(strings.ReplaceAll(vpa, ",", "."), 64)
 		lpa, _ := strconv.ParseFloat(strings.ReplaceAll(lpa, ",", "."), 64)
-		log.Printf("Valor Intríseco: %.2f\n", grahamMethod(lpa, vpa))
+		fairValue(grahamMethod(vpa, lpa), cotacao)
 	}
 }
