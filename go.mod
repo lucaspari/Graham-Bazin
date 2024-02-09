@@ -1,4 +1,4 @@
-module stockprice
+module github.com/lucaspari/Graham-Bazin
 
 go 1.22.0
 
