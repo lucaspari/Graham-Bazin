@@ -38,7 +38,7 @@ func getStockValue(valor string, opcao int16) (string, string, string, string) {
 	dividendYield := findDividendYield(doc, opcao)
 	lucroporAcao := findLucroPorAcao(doc)
 	valorPatrimonialPorAcao := findValorPorAcao(doc)
-	findPV(doc)
+	findPV(doc, opcao)
 	return cotacao, dividendYield, lucroporAcao, valorPatrimonialPorAcao
 }
 
@@ -70,24 +70,41 @@ func findCotacao(doc *goquery.Document) string {
 	return result
 }
 
-func findPV(doc *goquery.Document) string {
+func findPV(doc *goquery.Document, opcao int16) string {
 	var result string
 	colorGreen := "\033[32m"
 	colorRed := "\033[31m"
 	resetColor := "\033[0m"
-	doc.Find("div._card:nth-child(4) > div:nth-child(2) > span:nth-child(1)").Each(func(index int, item *goquery.Selection) {
-		result = strings.TrimSpace(item.Text())
-		parsedResult, err := strconv.ParseFloat(strings.ReplaceAll(
-			result, ",", "."), 32)
-		if err != nil {
-			log.Fatal("Error parsing float: ", err)
-		}
-		if parsedResult > 1 {
-			log.Println("Preço sobre valor Patrimonial (P/VP)", colorRed, strings.TrimSpace(item.Text()), resetColor)
-		} else {
-			log.Println("Preço sobre valor Patrimonial (P/VP)", colorGreen, strings.TrimSpace(item.Text()), resetColor)
-		}
-	})
+	if opcao == 2 {
+		doc.Find("#cards-ticker > div._card.vp > div._card-body > span").Each(func(index int, item *goquery.Selection) {
+			result = strings.TrimSpace(item.Text())
+			parsedResult, err := strconv.ParseFloat(strings.ReplaceAll(
+				result, ",", "."), 32)
+			if err != nil {
+				log.Fatal("Error parsing float: ", err)
+			}
+			if parsedResult > 1 {
+				log.Println("Preço sobre valor Patrimonial (P/VP)", colorRed, strings.TrimSpace(item.Text()), resetColor)
+			} else {
+				log.Println("Preço sobre valor Patrimonial (P/VP)", colorGreen, strings.TrimSpace(item.Text()), resetColor)
+			}
+		})
+	} else {
+
+		doc.Find("#cards-ticker > div._card.vp > div._card-body > span").Each(func(index int, item *goquery.Selection) {
+			result = strings.TrimSpace(item.Text())
+			parsedResult, err := strconv.ParseFloat(strings.ReplaceAll(
+				result, ",", "."), 32)
+			if err != nil {
+				log.Fatal("Error parsing float: ", err)
+			}
+			if parsedResult > 1 {
+				log.Println("Preço sobre valor Patrimonial (P/VP)", colorRed, strings.TrimSpace(item.Text()), resetColor)
+			} else {
+				log.Println("Preço sobre valor Patrimonial (P/VP)", colorGreen, strings.TrimSpace(item.Text()), resetColor)
+			}
+		})
+	}
 	return strings.TrimSpace(result)
 }
 func findLucroPorAcao(doc *goquery.Document) string {
